@@ -1,0 +1,14 @@
+#!/usr/bin/env lua
+
+local treh = require 'treh'
+local arrr = require 'arrr'
+
+local options do
+	local parse = arrr {
+		{ "Enable coloured output", "--color", "-c" };
+		--{ "Display hidden files", "--hidden", "-h" };
+	}
+	options = parse{...}
+end
+
+treh.dir(options[1], options)
