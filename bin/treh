@@ -6,7 +6,10 @@ local arrr = require 'arrr'
 local options do
 	local parse = arrr {
 		{ "Enable coloured output", "--color", "-c" };
-		--{ "Display hidden files", "--hidden", "-h" };
+		{ "Display hidden files", "--hidden", "-h" };
+		{ "Ignore a file matching this pattern", "--ignore", "-i", "pattern", true };
+		{ "Skip .git directories", "--no-git" };
+		{ "Skip .tup directories", "--no-tup" };
 	}
 	options = parse{...}
 end

@@ -4,10 +4,12 @@ local scaffold = require 'scaffold'
 
 local treh = {}
 
-local function recurse(tree, buffer, prefix, color)
+local function recurse(tree, buffer, prefix, filter, color)
 	local names = {}
 	for name in pairs(tree) do
-		table.insert(names, name)
+		if filter(name) then
+			table.insert(names, name)
+		end
 	end
 	table.sort(names)
 	for idx, name in pairs(names) do
@@ -16,7 +18,7 @@ local function recurse(tree, buffer, prefix, color)
 		local pipe = color('pipes', last and "└─ " or "├─ ")
 		table.insert(buffer, prefix .. pipe .. color(item==true and 'files' or 'directories', name))
 		if type(item) == "table" then
-			recurse(item, buffer, prefix .. color('pipes', last and "   " or "│  "), color)
+			recurse(item, buffer, prefix .. color('pipes', last and "   " or "│  "), filter, color)
 		end
 	end
 	return buffer
@@ -44,13 +46,42 @@ local function colors(lookup)
 	end
 end
 
+local function filter(patterns, name)
+	for pattern, plain in pairs(patterns) do
+		if name:find(pattern, 1, plain) then
+			return false
+		end
+	end
+	return true
+end
+
+local function buildfilter(options)
+	local patterns = {}
+	if options.nogit then
+		patterns[".git"] = true
+	end
+	if options.notup then
+		patterns["Tupfile"] = true
+		patterns["Tupfile.ini"] = true
+		patterns[".tup"] = true
+	end
+	if options.ignore then
+		for _, pattern in ipairs(options.ignore) do
+			patterns[pattern] = false
+		end
+	end
+	return function(name)
+		return filter(patterns, name)
+	end
+end
+
 function treh.dir(path, options)
 	path = path or '.'
-	local tree = scaffold.readdir(path, true)
+	local tree = scaffold.readdir(path, {files=true, hidden=options.hidden})
 
 	local color = options.color and colors(default_colors) or colors()
 
-	local lines = recurse(tree, {color('root', path)}, '', color)
+	local lines = recurse(tree, {color('root', path)}, '', buildfilter(options), color)
 
 	print(table.concat(lines, "\n"))
 end
