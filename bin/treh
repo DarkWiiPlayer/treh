@@ -10,8 +10,18 @@ local options do
 		{ "Ignore a file matching this pattern", "--ignore", "-i", "pattern", true };
 		{ "Skip .git directories", "--no-git" };
 		{ "Skip .tup directories", "--no-tup" };
+		{ "Read paths from stdin instead of directory", "--stdin" };
 	}
 	options = parse{...}
+end
+
+if options.stdin then
+	local paths = {}
+	for line in io.stdin:lines() do
+		paths[line] = true
+	end
+	treh.paths(paths, options)
+	return
 end
 
 treh.dir(options[1], options)

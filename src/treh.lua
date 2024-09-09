@@ -86,4 +86,14 @@ function treh.dir(path, options)
 	print(table.concat(lines, "\n"))
 end
 
+function treh.paths(paths, options)
+	local tree = {}
+	for path in pairs(paths) do
+		scaffold.deep(tree, path, true)
+	end
+	local color = options.color and colors(default_colors) or colors()
+	local lines = recurse(tree, {}, '', buildfilter(options), color)
+	print(table.concat(lines, "\n"))
+end
+
 return treh
